@@ -42,3 +42,10 @@
 </body>
 </html>
 
+<script src="settings.js"></script>
+<script>
+  applySettings();
+  const img = document.getElementById('wall');
+  const ch = new BroadcastChannel('interactive-wall');
+  ch.onmessage = e => { if(e.data?.type==='image') img.src = e.data.data; };
+</script>
