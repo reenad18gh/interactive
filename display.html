@@ -5,47 +5,40 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Display</title>
 <style>
-  :root{ 
-    --primary:#ff6f00; 
-    --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; 
-  }
-  body{
-    margin:0;
-    background:#0f1115;
-    color:#e7e7e7;
-    font-family:var(--font);
-  }
-  .bg{
-    position:fixed;
-    inset:0;
-    z-index:0;
-    overflow:hidden;
-  }
-  .wrap{
-    max-width:1100px;
-    margin:24px auto;
-    padding:0 16px;
-    position:relative;
-    z-index:1;
-    background:rgba(0,0,0,0.4);
-    border-radius:8px;
-  }
-  h1{
-    border-left:8px solid var(--primary);
-    padding-left:10px;
-  }
+  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  html,body{height:100%}
+  body{margin:0;background:#000;color:#e7e7e7;font-family:var(--font)}
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+  .stage{position:relative;z-index:1;display:grid;place-items:center;height:100vh;padding:16px}
+  .frame{max-width:94vw;max-height:88vh;box-shadow:0 10px 40px rgba(0,0,0,.6);border-radius:12px;overflow:hidden;background:#111}
+  .frame img{display:block;max-width:100%;max-height:100%}
+  .hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);opacity:.7;font-size:14px}
 </style>
 </head>
 <body>
 
 <div class="bg" data-bg-video></div>
 
-<div class="wrap">
-  <h1>Display Screen</h1>
-  <p>هذه شاشة العرض وتقرأ إعدادات Admin تلقائيًا.</p>
+<div class="stage">
+  <div class="frame">
+    <img id="wall" alt="Waiting for content">
+  </div>
+  <div class="hint">Waiting for user to send…</div>
 </div>
 
 <script src="settings.js"></script>
-<script>applySettings();</script>
+<script>
+  applySettings();
+
+  // Listen for images from the user page
+  const img = document.getElementById('wall');
+  const ch = new BroadcastChannel('interactive-wall');
+  ch.onmessage = (e)=>{
+    if(e.data?.type === 'image'){
+      img.src = e.data.data;
+    }
+  };
+</script>
 </body>
 </html>
+
