@@ -1,129 +1,28 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Interactive Board – Display</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Cairo:wght@600&family=Tajawal:wght@600&family=Inter:wght@600&family=IBM+Plex+Sans:wght@600&display=swap" rel="stylesheet">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Display</title>
 <style>
-  :root{--bg:#000}
-  html,body{height:100%}
-  body{margin:0;background:var(--bg);overflow:hidden;font-family:system-ui,Arial}
-
-  /* background layers */
-  #bgSolid{position:fixed;inset:0;background:#0B1220}
-  #bgImage{position:fixed;inset:0;background-position:center center;background-repeat:no-repeat;background-size:contain;opacity:.15;filter:blur(0px);pointer-events:none}
-
-  /* layout */
-  .stage{position:absolute;inset:0 360px 0 0;display:grid;place-items:center}
-  .pinboard{position:absolute;top:0;right:0;width:360px;height:100%;background:#0b0b0f;border-left:1px solid #202028;overflow:auto;padding:14px}
-  .pinboard h3{color:#9fb1c8;font:14px/1.2 system-ui;margin:6px 4px 10px}
-  .pin{background:#121219;border:1px solid #1f2030;border-radius:12px;padding:10px 12px;margin:8px 0;color:#fff;word-wrap:break-word}
-  .pin img{max-width:100%;border-radius:10px;display:block}
-  .pin .meta{opacity:.6;font-size:11px;margin-top:6px}
-  #badge{position:fixed;top:12px;left:12px;background:#0b0e;backdrop-filter:blur(6px);color:#fff;padding:6px 10px;border-radius:10px;font:14px system-ui}
-  #img{max-width:100%;max-height:100%;opacity:0;transition:opacity .35s ease}
-
-  /* animation for incoming image */
-  .incoming{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
-  @keyframes spinIn{0%{transform:translate(-50%,-50%) rotate(-360deg) scale(.1);opacity:0}70%{opacity:1}100%{transform:translate(-50%,-50%) rotate(0) scale(1)}}
-  .anim-spin{animation:spinIn .9s ease both}
+  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  body{margin:0;background:#0b0d12;color:#e7e7e7;font-family:var(--font)}
+  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+  .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+  h1{border-left:8px solid var(--primary);padding-left:10px}
 </style>
+</head>
+<body>
 
-<div id="bgSolid"></div>
-<div id="bgImage"></div>
+<div class="bg" data-bg-video></div>
 
-<div id="badge">Display Ready <label><input id="lock" type="checkbox"> Lock</label></div>
-
-<div class="stage" id="stage">
-  <img id="img" alt="board"/>
+<div class="wrap">
+  <h1>Display Screen</h1>
+  <p>هذه شاشة العرض وتقرأ إعدادات Admin تلقائيًا.</p>
 </div>
 
-<aside class="pinboard" id="pinboard">
-  <h3>Pinned Items</h3>
-</aside>
-
-<script>
-const ch = new BroadcastChannel('interactive-board');
-const pinboard = document.getElementById('pinboard');
-const lock = document.getElementById('lock');
-const bgSolid = document.getElementById('bgSolid');
-const bgImage = document.getElementById('bgImage');
-const KEY_BG='board.background';
-const KEY_TEXT='board.settings';
-
-// apply background from admin
-function applyBackground(){
-  let b={mode:'solid',solidColor:'#0B1220',imageData:null,opacity:.15,blur:0,fit:'contain',tint:'#000000',tintOp:0};
-  try{ b=Object.assign(b, JSON.parse(localStorage.getItem(KEY_BG)||'{}')); }catch(e){}
-  // solid
-  bgSolid.style.background = b.solidColor || '#0B1220';
-  // image
-  if(b.mode==='image' && b.imageData){
-    bgImage.style.display='';
-    bgImage.style.backgroundImage = `url(${b.imageData})`;
-    bgImage.style.opacity = b.opacity;
-    bgImage.style.filter = `blur(${b.blur}px)`;
-    bgImage.style.backgroundSize = b.fit;
-  }else{
-    bgImage.style.display='none';
-  }
-}
-applyBackground();
-
-// receive
-ch.onmessage = (e)=>{
-  if(lock.checked) return;
-  const {type} = e.data || {};
-  if(type==='image') handleImage(e.data);
-  if(type==='text') handleText(e.data); // still supported if لزم
-};
-
-function handleImage({data}){
-  // animated incoming
-  const el = document.createElement('img');
-  el.className='incoming anim-spin';
-  el.src = data;
-  document.getElementById('stage').appendChild(el);
-
-  const done = ()=>{ el.remove(); pinImage(data); };
-  el.addEventListener('animationend', done, {once:true});
-  setTimeout(done, 1500);
-}
-
-function pinImage(src){
-  const pin = document.createElement('div');
-  pin.className='pin';
-  const im = new Image();
-  im.src = src;
-  pin.appendChild(im);
-  const meta=document.createElement('div');
-  meta.className='meta';
-  meta.textContent=new Date().toLocaleTimeString();
-  pin.appendChild(meta);
-  pinboard.appendChild(pin);
-  pinboard.scrollTop = pinboard.scrollHeight;
-}
-
-function handleText({text,size=64,color='#fff',font='system-ui,Arial'}){
-  const pin = document.createElement('div');
-  pin.className='pin';
-  pin.style.fontFamily = font;
-  pin.style.color = color;
-  pin.style.fontSize = (size>=72?'40px':size>=40?'28px':'18px');
-  pin.textContent = text;
-  const meta=document.createElement('div'); meta.className='meta'; meta.textContent=new Date().toLocaleTimeString();
-  pin.appendChild(meta);
-  pinboard.appendChild(pin);
-  pinboard.scrollTop = pinboard.scrollHeight;
-}
-
-// hotkeys
-addEventListener('keydown', e=>{
-  if(e.key.toLowerCase()==='l') lock.click();
-  if(e.key.toLowerCase()==='b'){
-    const badge=document.getElementById('badge');
-    badge.style.display = badge.style.display==='none' ? '' : 'none';
-  }
-});
-</script>
+<script src="settings.js"></script>
+<script>applySettings();</script>
+</body>
 </html>
+
