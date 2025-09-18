@@ -5,23 +5,55 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>User</title>
 <style>
-  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-  body{margin:0;background:#0f1115;color:#e7e7e7;font-family:var(--font)}
-  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
-  .wrap{max-width:920px;margin:24px auto;padding:0 16px}
-  .chip{display:inline-block;background:var(--primary);color:#111;padding:6px 10px;border-radius:999px;font-weight:700}
+  :root{ 
+    --primary:#ff6f00; 
+    --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; 
+  }
+  body{
+    margin:0;
+    background:#0f1115;
+    color:#e7e7e7;
+    font-family:var(--font);
+  }
+  /* خلفية الفيديو */
+  .bg{
+    position:fixed;
+    inset:0;
+    z-index:0;           /* أصبح 0 بدل -1 */
+    overflow:hidden;
+  }
+  .wrap{
+    max-width:920px;
+    margin:24px auto;
+    padding:0 16px;
+    position:relative;
+    z-index:1;           /* المحتوى فوق الفيديو */
+    background:rgba(0,0,0,0.4); /* شفافية بسيطة للخلفية لقراءة النص */
+    border-radius:8px;
+  }
+  .chip{
+    display:inline-block;
+    background:var(--primary);
+    color:#111;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:700;
+  }
 </style>
 </head>
 <body>
 
+<!-- خلفية الفيديو -->
 <div class="bg" data-bg-video></div>
 
+<!-- محتوى الصفحة -->
 <div class="wrap">
   <h1>User Screen</h1>
   <p class="chip">Theme applied from Admin</p>
   <p>هذا المحتوى يظهر للمستخدم بتنسيق الألوان والخط المحدد من صفحة Admin.</p>
 </div>
 
+<!-- تحميل سكربت الإعدادات وتطبيقها -->
 <script src="settings.js"></script>
 <script>applySettings();</script>
 </body>
