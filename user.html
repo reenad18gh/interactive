@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>User</title>
 <style>
-  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif }
   body{margin:0;background:#0f1115;color:#e7e7e7;font-family:var(--font)}
   .wrap{max-width:1100px;margin:16px auto;padding:0 16px}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
   .btn{background:var(--primary);color:#111;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
   .input{background:#181a20;color:#e7e7e7;border:1px solid #333;border-radius:8px;padding:8px 10px}
-  .board{position:relative;border:1px dashed #333;border-radius:8px;overflow:hidden;touch-action:none;background:#111}
+  .board{border:1px dashed #333;border-radius:8px;overflow:hidden;background:#111}
   canvas{display:block;width:100%;height:520px;touch-action:none;cursor:crosshair}
 </style>
 </head>
@@ -35,7 +35,6 @@
 <script>
   applySettings();
 
-  // Canvas setup
   const canvas = document.getElementById('pad');
   const ctx = canvas.getContext('2d');
   const color = document.getElementById('color');
@@ -43,67 +42,50 @@
   const clearBtn = document.getElementById('clearBtn');
   const sendBtn  = document.getElementById('sendBtn');
 
-  // Resize canvas to actual pixels
   function fit(){
-    const rect = canvas.getBoundingClientRect();
+    const r = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    canvas.width  = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    ctx.scale(dpr, dpr);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.fillStyle = '#111';
-    ctx.fillRect(0,0,rect.width,rect.height);
+    canvas.width  = Math.floor(r.width * dpr);
+    canvas.height = Math.floor(520 * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.fillStyle='#111'; ctx.fillRect(0,0,r.width,520);
   }
-  window.addEventListener('resize', fit);
-  fit();
+  window.addEventListener('resize', fit); fit();
 
-  let drawing = false, lastX=0, lastY=0;
-
-  function pos(e){
+  let drawing=false, lastX=0, lastY=0;
+  const pos = e=>{
     const r = canvas.getBoundingClientRect();
     const x = (e.clientX ?? e.touches?.[0].clientX) - r.left;
     const y = (e.clientY ?? e.touches?.[0].clientY) - r.top;
     return {x,y};
-  }
-
-  function down(e){
-    e.preventDefault();
-    drawing = true;
+  };
+  const down = e=>{ e.preventDefault(); drawing=true; ({x:lastX,y:lastY}=pos(e)); };
+  const move = e=>{
+    if(!drawing) return; e.preventDefault();
     const p = pos(e);
-    lastX = p.x; lastY = p.y;
-  }
-  function move(e){
-    if(!drawing) return;
-    e.preventDefault();
-    const p = pos(e);
-    ctx.strokeStyle = color.value;
-    ctx.lineWidth = Number(size.value);
-    ctx.beginPath();
-    ctx.moveTo(lastX,lastY);
-    ctx.lineTo(p.x,p.y);
-    ctx.stroke();
-    lastX = p.x; lastY = p.y;
-  }
-  function up(e){ drawing = false; }
+    ctx.strokeStyle = color.value; ctx.lineWidth = +size.value;
+    ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+    lastX=p.x; lastY=p.y;
+  };
+  const up = ()=> drawing=false;
 
-  canvas.addEventListener('pointerdown', down);
-  canvas.addEventListener('pointermove', move);
-  canvas.addEventListener('pointerup',   up);
-  canvas.addEventListener('pointercancel', up);
-  canvas.addEventListener('touchstart', down, {passive:false});
-  canvas.addEventListener('touchmove',  move, {passive:false});
-  canvas.addEventListener('touchend',   up);
+  canvas.addEventListener('pointerdown',down);
+  canvas.addEventListener('pointermove',move);
+  canvas.addEventListener('pointerup',up);
+  canvas.addEventListener('pointercancel',up);
 
-  clearBtn.onclick = ()=>{ fit(); };
+  canvas.addEventListener('touchstart',down,{passive:false});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',up);
 
-  // Send to display via BroadcastChannel
   const ch = new BroadcastChannel('interactive-wall');
-  sendBtn.onclick = ()=>{
-    // نرسل صورة PNG مضغوطة
+  clearBtn.onclick = ()=> fit();
+  sendBtn.onclick  = ()=>{
     const data = canvas.toDataURL('image/png');
     ch.postMessage({type:'image', data});
   };
 </script>
 </body>
 </html>
+
