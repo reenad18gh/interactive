@@ -1,48 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Interactive & Wall</title>
-  <style>
-    body{margin:0;background:#0f1115;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .hero{position:relative;width:100%;height:42vw;max-height:520px;min-height:260px;overflow:hidden}
-    .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
-      color:#fff;background:rgba(0,0,0,.18);font-weight:700;font-size:clamp(18px,3vw,36px)}
-    .buttons{
-      display:flex;justify-content:center;gap:12px;margin-top:16px;flex-wrap:wrap
-    }
-    .btn{padding:10px 20px;background:#ff6f00;color:#111;text-decoration:none;border-radius:8px;font-weight:700;transition:0.3s}
-    .btn:hover{background:#ffa733}
-    .wrap{max-width:920px;margin:28px auto;padding:0 16px}
-    h2{margin:24px 0 12px}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interactive & Wall</title>
+<style>
+  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  html,body{margin:0}
+  body{background:#0f1115;color:#e7e7e7;font-family:var(--font)}
+  .hero{position:relative;width:100%;height:42vw;max-height:520px;min-height:260px;overflow:hidden}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff;
+           background:rgba(0,0,0,.18);font-weight:700;font-size:clamp(18px,3vw,36px)}
+  .wrap{max-width:920px;margin:28px auto;padding:0 16px}
+  .buttons{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{padding:10px 16px;background:var(--primary);color:#111;text-decoration:none;border-radius:8px;font-weight:700}
+  .light body{background:#fff;color:#111}
+</style>
 </head>
 <body>
 
-  <!-- بانر الفيديو -->
-  <section class="hero">
-    <video autoplay muted loop playsinline preload="auto" poster="banner.mp4">
-      <source src="banner.mp4?v=4" type="video/mp4">
-    </video>
-    <div class="overlay">
-      <div>
-        Interactive & Wall
-        <div class="buttons">
-          <a class="btn" href="display.html">Enter Display Screen</a>
-          <a class="btn" href="user.html">Enter User</a>
-          <a class="btn" href="writer.html">Enter Admin</a>
-        </div>
-      </div>
-    </div>
-  </section>
+<section class="hero">
+  <video autoplay muted loop playsinline preload="auto">
+    <source src="banner.mp4?v=5" type="video/mp4">
+  </video>
+  <div class="overlay">Interactive & Wall</div>
+</section>
 
-  <!-- محتوى الصفحة -->
-  <div class="wrap">
-    <h2>About</h2>
-    <p>Interactive prototypes and experiments.</p>
+<div class="wrap">
+  <h2>Pages</h2>
+  <div class="buttons">
+    <a class="btn" href="display.html">Enter Display Screen</a>
+    <a class="btn" href="user.html">Enter User</a>
+    <a class="btn" href="writer.html">Enter Admin</a>
   </div>
+</div>
 
+<!-- تحميل سكربت الإعدادات وتطبيقها -->
+<?!-- استخدم نفس السكربت في كل الصفحات -->
+<?!-- GitHub Pages لا يدعم PHP؛ السطرين أعلاه مجرد تعليق -->
+<!-- انسخي settings.js كما هو: -->
+<script src="settings.js"></script>
+<script>applySettings();</script>
 </body>
 </html>
