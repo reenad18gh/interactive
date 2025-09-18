@@ -10,6 +10,17 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,Arial;background:var(--bg);color:var(--text)}
+<!-- Banner Video -->
+<div style="position: relative; width: 100%; height: 0; padding-bottom: 40%; overflow: hidden;">
+  <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+    <source src="banner.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <!-- نص اختياري فوق الفيديو -->
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 2em; font-weight: bold;">
+    Welcome to My Interactive Website
+  </div>
+</div>
 
   /* banner */
   .video-banner{position:relative;width:100%;height:360px;overflow:hidden}
