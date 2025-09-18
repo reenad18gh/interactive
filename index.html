@@ -1,225 +1,50 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Interactive Wall – Access</title>
-<style>
-  :root{
-    --brand:#00A3FF; --brand-2:#0A84FF; --bg:#001f3f;
-    --text:#EAF1FF; --muted:#9DB0C8; --border:#27305E; --panel:#0F1A2B;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,Arial;background:var(--bg);color:var(--text)}
-<!-- Banner Video -->
-<div style="position: relative; width: 100%; height: 0; padding-bottom: 40%; overflow: hidden;">
-  <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-    <source src="banner.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-  <!-- نص اختياري فوق الفيديو -->
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 2em; font-weight: bold;">
-    Welcome to My Interactive Website
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interactive</title>
+  <style>
+    body{margin:0;background:#0f1115;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    /* فيديو بانر */
+    .hero{position:relative;width:100%;height:42vw;max-height:520px;min-height:260px;overflow:hidden}
+    .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+      color:#fff;background:rgba(0,0,0,.18);font-weight:700;font-size:clamp(18px,3vw,36px)}
+    .btn{display:inline-block;margin-top:12px;padding:10px 16px;background:#ff6f00;color:#111;
+      text-decoration:none;border-radius:8px;font-weight:700}
+    /* محتوى تحت البانر */
+    .wrap{max-width:920px;margin:28px auto;padding:0 16px}
+    h2{margin:24px 0 12px}
+  </style>
+</head>
+<body>
+
+  <!-- بانر الفيديو -->
+  <section class="hero">
+    <video autoplay muted loop playsinline preload="auto" poster="banner.mp4">
+      <source src="banner.mp4?v=3" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <div>
+        Welcome to My Interactive Website<br>
+        <a class="btn" href="display.html">Explore</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- محتوى الصفحة -->
+  <div class="wrap">
+    <h2>About</h2>
+    <p>Interactive prototypes and experiments.</p>
+
+    <h2>Pages</h2>
+    <ul>
+      <li><a href="display.html">Display screen</a></li>
+      <li><a href="user.html">User screen</a></li>
+      <li><a href="writer.html">Writer screen</a></li>
+    </ul>
   </div>
-</div>
 
-  /* banner */
-  .video-banner{position:relative;width:100%;height:360px;overflow:hidden}
-  .video-banner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .video-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.3),rgba(0,0,0,.7))}
-  .banner-content{position:relative;z-index:1;display:grid;place-items:center;height:100%;text-align:center}
-  .banner-content h1{margin:0;font-size:52px;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.35)}
-
-  /* grid */
-  .wrap{max-width:1080px;margin:32px auto;padding:0 16px;display:grid;gap:18px}
-  @media(min-width:900px){ .wrap{grid-template-columns:1fr 1fr 1fr} }
-
-  /* card */
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
-  .card h2{margin:0;font-size:22px}
-  .desc{margin:0;color:var(--muted);font-size:14px}
-  .row{display:flex;gap:8px;align-items:center}
-  label{font-size:12px;color:var(--muted)}
-  input[type=password]{flex:1;padding:12px 14px;border:2px solid var(--brand);border-radius:12px;background:#0f1530;color:#fff}
-  .err{min-height:16px;font-size:12px;color:#ff8a8a}
-  .actions{display:flex;gap:8px;flex-wrap:wrap}
-  button,a.btn{flex:1;padding:12px 14px;border-radius:12px;text-align:center;text-decoration:none;border:1px solid var(--brand-2);background:var(--brand);color:#fff;cursor:pointer;transition:.15s}
-  button:hover,a.btn:hover{filter:brightness(1.07)}
-  .ghost{background:#121735;border:1px solid var(--border)}
-  .ok{background:#24a148;border:1px solid #2ecc71}
-  .muted{font-size:12px;color:var(--muted)}
-</style>
-
-<!-- banner -->
-<section class="video-banner">
-  <video autoplay muted loop playsinline>
-    <source src="assets/banner.mp4" type="video/mp4">
-  </video>
-  <div class="banner-content">
-    <h1>Interactive Wall</h1>
-  </div>
-</section>
-
-<div class="wrap">
-  <!-- Admin -->
-  <section class="card" id="adminCard">
-    <h2>Admin Access</h2>
-    <p class="desc">Settings and live display preview.</p>
-
-    <div id="adminForm">
-      <label>Admin Code</label>
-      <div class="row">
-        <input id="adminCode" type="password" placeholder="Enter admin code" inputmode="numeric" />
-      </div>
-      <div class="row" style="justify-content:space-between">
-        <label><input id="adminRemember" type="checkbox"> Remember</label>
-        <span class="err" id="adminErr"></span>
-      </div>
-      <div class="actions">
-        <button id="adminBtn">Enter Admin</button>
-      </div>
-    </div>
-
-    <div id="adminOk" style="display:none">
-      <div class="muted">Access granted</div>
-      <div class="actions">
-        <a class="btn ok" href="admin.html">Open Admin</a>
-        <a class="btn ghost" href="display.html" target="_blank" rel="noopener">Open Display</a>
-        <button class="ghost" id="adminLogout">Forget</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- User -->
-  <section class="card" id="userCard">
-    <h2>User Access</h2>
-    <p class="desc">Touch writing only. Sends to the big display.</p>
-
-    <div id="userForm">
-      <label>User Code</label>
-      <div class="row">
-        <input id="userCode" type="password" placeholder="Enter user code" inputmode="numeric" />
-      </div>
-      <div class="row" style="justify-content:space-between">
-        <label><input id="userRemember" type="checkbox"> Remember</label>
-        <span class="err" id="userErr"></span>
-      </div>
-      <div class="actions">
-        <button id="userBtn">Enter User</button>
-      </div>
-    </div>
-
-    <div id="userOk" style="display:none">
-      <div class="muted">Access granted</div>
-      <div class="actions">
-        <a class="btn ok" href="user.html">Open User</a>
-        <a class="btn ghost" href="display.html" target="_blank" rel="noopener">Open Display</a>
-        <button class="ghost" id="userLogout">Forget</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Display -->
-  <section class="card" id="displayCard">
-    <h2>Display Screen</h2>
-    <p class="desc">Big screen for audience.</p>
-
-    <div id="displayForm">
-      <label>Display Code</label>
-      <div class="row">
-        <input id="displayCode" type="password" placeholder="Enter display code" inputmode="numeric" />
-      </div>
-      <div class="row" style="justify-content:space-between">
-        <label><input id="displayRemember" type="checkbox"> Remember</label>
-        <span class="err" id="displayErr"></span>
-      </div>
-      <div class="actions">
-        <button id="displayBtn">Open Display</button>
-      </div>
-    </div>
-
-    <div id="displayOk" style="display:none">
-      <div class="muted">Access granted</div>
-      <div class="actions">
-        <a class="btn ok" href="display.html" target="_blank" rel="noopener">Open Display</a>
-        <button class="ghost" id="displayLogout">Forget</button>
-      </div>
-    </div>
-  </section>
-</div>
-
-<script>
-  // codes
-  const ADMIN_CODE   = "2025-admin";
-  const USER_CODE    = "2025-user";
-  const DISPLAY_CODE = "2025-display";
-
-  // storage keys
-  const K = { admin:"auth.admin", user:"auth.user", display:"auth.display" };
-
-  // helpers
-  const $ = s => document.querySelector(s);
-  function remember(key){ localStorage.setItem(key, "1"); }
-  function forget(key){ localStorage.removeItem(key); }
-  function isRemembered(key){ return localStorage.getItem(key)==="1"; }
-
-  // toggle views
-  function setAuth(card, ok){
-    const form = $(`#${card}Form`);
-    const okv  = $(`#${card}Ok`);
-    form.style.display = ok ? "none" : "";
-    okv.style.display  = ok ? "" : "none";
-  }
-
-  // boot: restore remembered states
-  setAuth("admin",  isRemembered(K.admin));
-  setAuth("user",   isRemembered(K.user));
-  setAuth("display",isRemembered(K.display));
-
-  // Admin
-  $("#adminBtn").onclick = ()=>{
-    const code = $("#adminCode").value.trim();
-    if(code !== ADMIN_CODE){ $("#adminErr").textContent="Wrong code"; return; }
-    $("#adminErr").textContent="";
-    if($("#adminRemember").checked) remember(K.admin);
-    setAuth("admin", true);
-    try{ window.open('display.html','_blank','noopener'); }catch(e){}
-    location.href='admin.html';
-  };
-  $("#adminLogout").onclick = ()=>{ forget(K.admin); setAuth("admin", false); };
-
-  // User
-  $("#userBtn").onclick = ()=>{
-    const code = $("#userCode").value.trim();
-    if(code !== USER_CODE){ $("#userErr").textContent="Wrong code"; return; }
-    $("#userErr").textContent="";
-    if($("#userRemember").checked) remember(K.user);
-    setAuth("user", true);
-    try{ window.open('display.html','_blank','noopener'); }catch(e){}
-    location.href='user.html';
-  };
-  $("#userLogout").onclick = ()=>{ forget(K.user); setAuth("user", false); };
-
-  // Display
-  $("#displayBtn").onclick = ()=>{
-    const code = $("#displayCode").value.trim();
-    if(code !== DISPLAY_CODE){ $("#displayErr").textContent="Wrong code"; return; }
-    $("#displayErr").textContent="";
-    if($("#displayRemember").checked) remember(K.display);
-    setAuth("display", true);
-    location.href='display.html';
-  };
-  $("#displayLogout").onclick = ()=>{ forget(K.display); setAuth("display", false); };
-
-  // Enter = submit
-  ["adminCode","userCode","displayCode"].forEach(id=>{
-    const input = document.getElementById(id);
-    input?.addEventListener('keydown', e=>{
-      if(e.key==="Enter"){
-        if(id==="adminCode") $("#adminBtn").click();
-        if(id==="userCode") $("#userBtn").click();
-        if(id==="displayCode") $("#displayBtn").click();
-      }
-    });
-  });
-</script>
+</body>
 </html>
