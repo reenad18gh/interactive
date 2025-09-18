@@ -1,70 +1,28 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Board – User (Touch Only)</title>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>User</title>
 <style>
-  :root{ --brand:#00A3FF; --bg:#0B1220; --panel:#0F1A2B; --text:#EAF1FF; --border:#27305E; }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Arial}
-  header{display:flex;gap:10px;align-items:center;justify-content:center;padding:10px;background:var(--panel);border-bottom:1px solid var(--border)}
-  button{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 20px;font-size:18px;cursor:pointer}
-  #wrap{position:relative}
-  canvas{display:block;width:100vw;height:calc(100vh - 70px);touch-action:none;background:#000}
-  .note{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);opacity:.7;font-size:12px}
+  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  body{margin:0;background:#0f1115;color:#e7e7e7;font-family:var(--font)}
+  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+  .wrap{max-width:920px;margin:24px auto;padding:0 16px}
+  .chip{display:inline-block;background:var(--primary);color:#111;padding:6px 10px;border-radius:999px;font-weight:700}
 </style>
+</head>
+<body>
 
-<header>
-  <button id="send">Send</button>
-  <button id="clear" style="background:#23314f">Clear</button>
-</header>
-<div id="wrap"><canvas id="cv"></canvas></div>
-<div class="note">Use finger to write. Tap Send to push to display.</div>
+<div class="bg" data-bg-video></div>
 
-<script>
-const ch = new BroadcastChannel('interactive-board');
-const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-let strokes=[], cur=null;
-const STROKE_COLOR = '#ffffff';
-const STROKE_WIDTH = 10;
+<div class="wrap">
+  <h1>User Screen</h1>
+  <p class="chip">Theme applied from Admin</p>
+  <p>هذا المحتوى يظهر للمستخدم بتنسيق الألوان والخط المحدد من صفحة Admin.</p>
+</div>
 
-function resize(){
-  const dpr = Math.max(1, devicePixelRatio||1);
-  cv.width = Math.floor(innerWidth*dpr);
-  cv.height = Math.floor((innerHeight-70)*dpr);
-  cv.style.width = innerWidth+'px';
-  cv.style.height = (innerHeight-70)+'px';
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  redraw();
-}
-addEventListener('resize', resize); resize();
-
-function pos(e){ const r=cv.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
-function start(e){ e.preventDefault(); const {x,y}=pos(e); cur={color:STROKE_COLOR,width:STROKE_WIDTH,pts:[[x,y]]}; strokes.push(cur); redraw(); }
-function move(e){ if(!cur)return; const {x,y}=pos(e); const p=cur.pts[cur.pts.length-1]; if(Math.hypot(x-p[0],y-p[1])<0.5)return; cur.pts.push([x,y]); redraw(); }
-function end(){ cur=null; }
-
-function redraw(){
-  ctx.clearRect(0,0,cv.width,cv.height);
-  for(const s of strokes){
-    ctx.strokeStyle=s.color; ctx.lineWidth=s.width; ctx.lineJoin=ctx.lineCap='round';
-    ctx.beginPath(); const a=s.pts; if(!a.length)continue; ctx.moveTo(a[0][0],a[0][1]); for(let i=1;i<a.length;i++) ctx.lineTo(a[i][0],a[i][1]); ctx.stroke();
-  }
-}
-
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);start(e);});
-cv.addEventListener('pointermove',move); cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
-cv.addEventListener('touchstart',start,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',end);
-
-clear.onclick = ()=>{ strokes=[]; redraw(); };
-send.onclick = ()=>{
-  if(!strokes.length) return;
-  redraw();
-  ch.postMessage({ type:'image', data: cv.toDataURL('image/png') });
-  // feedback
-  send.textContent='Sent ✓'; setTimeout(()=> send.textContent='Send', 900);
-  // keep the drawing or clear? choose clear for events
-  strokes=[]; redraw();
-};
-</script>
+<script src="settings.js"></script>
+<script>applySettings();</script>
+</body>
 </html>
