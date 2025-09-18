@@ -1,121 +1,83 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Interactive Board – Writer</title>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Settings</title>
 <style>
-  :root{--bg:#0f1220;--panel:#13162a;--muted:#8ea0b5}
-  body{margin:0;background:var(--bg);color:#eef;font-family:system-ui,Arial}
-  header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:var(--panel);position:sticky;top:0}
-  button,select,input[type=range],input[type=color],input[type=text],input[type=number]{background:#1b2240;color:#fff;border:1px solid #2c3562;border-radius:10px;padding:8px 12px}
-  button:hover{filter:brightness(1.08)}
-  canvas{display:block;width:100vw;height:calc(100vh - 120px);touch-action:none;background:#000}
-  .group{display:flex;gap:8px;align-items:center}
-  label{font-size:12px;color:var(--muted)}
+  :root{ --primary:#ff6f00; --font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  body{margin:0;background:#0f1115;color:#e7e7e7;font-family:var(--font)}
+  .wrap{max-width:880px;margin:24px auto;padding:0 16px}
+  label{display:block;margin:12px 0 6px}
+  input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#181a20;color:#e7e7e7}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn{margin-top:16px;padding:10px 16px;background:var(--primary);color:#111;border:none;border-radius:8px;font-weight:700;cursor:pointer}
+  .note{opacity:.8;margin-top:8px}
 </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin Settings</h1>
 
-<header>
-  <!-- draw tools (kept) -->
-  <div class="group">
-    <button id="sendImg">Send Canvas</button>
-    <button id="undo">Undo</button>
-    <button id="clear">Clear</button>
-    <label>Stroke <input id="th" type="range" min="2" max="24" value="8"></label>
-    <label>Color <input id="col" type="color" value="#19a1ff"></label>
+  <label>Primary Color</label>
+  <input type="color" id="primary" value="#ff6f00">
+
+  <div class="row">
+    <div>
+      <label>Font Family</label>
+      <select id="font">
+        <option value="system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">System</option>
+        <option value="Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">Inter</option>
+        <option value="Arial,Helvetica,sans-serif">Arial</option>
+        <option value="Georgia,serif">Georgia</option>
+        <option value="'Courier New',monospace">Courier New</option>
+      </select>
+    </div>
+    <div>
+      <label>Mode</label>
+      <select id="mode">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
   </div>
 
-  <!-- text tools -->
-  <div class="group">
-    <input id="ttext" type="text" placeholder="Type text..." style="min-width:240px" />
-    <label>Size <input id="tsize" type="number" min="16" max="200" value="64" style="width:84px"></label>
-    <label>Color <input id="tcolor" type="color" value="#ffffff"></label>
-    <select id="tfont" title="Font">
-      <option value="system-ui,Arial">System</option>
-      <option value="Montserrat,Arial">Montserrat</option>
-      <option value="Cairo,Arial">Cairo (AR)</option>
-      <option value="Tajawal,Arial">Tajawal (AR)</option>
-      <option value="IBM Plex Sans,Arial">IBM Plex Sans</option>
-      <option value="Inter,Arial">Inter</option>
-    </select>
-    <select id="tanim" title="Animation">
-      <option value="spin-in">Spin In</option>
-      <option value="slide-up">Slide Up</option>
-      <option value="zoom-pop">Zoom Pop</option>
-      <option value="bounce">Bounce</option>
-      <option value="float">Float</option>
-    </select>
-    <button id="sendText">Send Text</button>
-  </div>
-</header>
+  <label><input type="checkbox" id="videoEnabled"> Enable Background Video</label>
+  <label>Background Video URL or file name (mp4)</label>
+  <input id="videoUrl" placeholder="banner.mp4 or https://.../video.mp4">
 
-<canvas id="cv"></canvas>
+  <button class="btn" id="saveBtn">Save</button>
+  <button class="btn" id="resetBtn" style="background:#999;color:#111;margin-left:8px">Reset Defaults</button>
+  <div class="note">بعد الحفظ ارجع لصفحات User و Display ورح تتطبق الإعدادات تلقائيًا.</div>
+</div>
 
+<script src="settings.js"></script>
 <script>
-// channel
-const ch = new BroadcastChannel('interactive-board');
+  // تحميل القيم الحالية في النموذج
+  const s = SiteSettings.getSettings();
+  primary.value = s.primary;
+  font.value = s.font;
+  mode.value = s.mode;
+  videoEnabled.checked = !!s.videoEnabled;
+  videoUrl.value = s.videoUrl || '';
 
-// canvas draw
-const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-let strokes=[], cur=null;
-const th = document.getElementById('th');
-const col = document.getElementById('col');
+  saveBtn.onclick = () => {
+    const newS = {
+      primary: primary.value,
+      font: font.value,
+      mode: mode.value,
+      videoEnabled: videoEnabled.checked,
+      videoUrl: videoUrl.value.trim()
+    };
+    SiteSettings.saveSettings(newS);
+    alert('Saved. Open user/display pages to see changes.');
+  };
 
-function resize(){
-  const dpr = Math.max(1, devicePixelRatio||1);
-  cv.width = Math.floor(innerWidth*dpr);
-  cv.height = Math.floor((innerHeight-120)*dpr);
-  cv.style.width = innerWidth+'px';
-  cv.style.height = (innerHeight-120)+'px';
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  redraw();
-}
-addEventListener('resize', resize); resize();
-
-function pos(e){ const r=cv.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
-function start(e){ e.preventDefault(); const {x,y}=pos(e); cur={color:col.value,width:+th.value,pts:[[x,y]]}; strokes.push(cur); redraw(); }
-function move(e){ if(!cur)return; const {x,y}=pos(e); const p=cur.pts[cur.pts.length-1]; if(Math.hypot(x-p[0],y-p[1])<0.5)return; cur.pts.push([x,y]); redraw(); }
-function end(){ cur=null; }
-function redraw(){
-  ctx.clearRect(0,0,cv.width,cv.height);
-  for(const s of strokes){
-    ctx.strokeStyle=s.color; ctx.lineWidth=s.width; ctx.lineJoin=ctx.lineCap='round';
-    ctx.beginPath(); const a=s.pts; if(!a.length)continue; ctx.moveTo(a[0][0],a[0][1]); for(let i=1;i<a.length;i++) ctx.lineTo(a[i][0],a[i][1]); ctx.stroke();
-  }
-}
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);start(e);});
-cv.addEventListener('pointermove',move); cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
-cv.addEventListener('touchstart',start,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',end);
-
-undo.onclick = ()=>{ strokes.pop(); redraw(); };
-clear.onclick = ()=>{ strokes=[]; redraw(); };
-
-// send canvas image
-sendImg.onclick = ()=>{
-  redraw();
-  ch.postMessage({type:'image', data: cv.toDataURL('image/png')});
-  sendImg.textContent='Sent'; setTimeout(()=>sendImg.textContent='Send Canvas',900);
-};
-
-// text sending
-const ttext=document.getElementById('ttext');
-const tsize=document.getElementById('tsize');
-const tcolor=document.getElementById('tcolor');
-const tfont=document.getElementById('tfont');
-const tanim=document.getElementById('tanim');
-sendText.onclick = ()=>{
-  const text = ttext.value.trim();
-  if(!text) return;
-  ch.postMessage({
-    type:'text',
-    text, size:+tsize.value, color:tcolor.value, font:tfont.value, anim:tanim.value
-  });
-  sendText.textContent='Sent'; setTimeout(()=>sendText.textContent='Send Text',900);
-  ttext.select();
-};
-
-// shortcuts
-addEventListener('keydown',e=>{
-  if(e.ctrlKey && e.key.toLowerCase()==='k'){ sendImg.click(); }
-});
+  resetBtn.onclick = () => {
+    SiteSettings.saveSettings(SiteSettings.DEFAULTS);
+    alert('Reset done.');
+    location.reload();
+  };
 </script>
+</body>
 </html>
